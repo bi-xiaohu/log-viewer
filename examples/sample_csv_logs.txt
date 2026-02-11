@@ -1,0 +1,10 @@
+2026-02-11 10:30:15,INFO,AuthService,User login successful
+2026-02-11 10:30:20,ERROR,DatabaseService,Connection timeout after 30s
+2026-02-11 10:30:25,DEBUG,CacheService,Cache hit for key: user_123
+2026-02-11 10:30:30,WARN,APIGateway,Rate limit approaching for IP 192.168.1.1
+2026-02-11 10:30:35,INFO,PaymentService,Payment processed successfully
+2026-02-11 10:30:40,ERROR,EmailService,Failed to send notification email
+2026-02-11 10:30:45,INFO,UserService,New user registration: user456
+2026-02-11 10:30:50,DEBUG,SessionService,Session refreshed for user_789
+2026-02-11 10:30:55,WARN,SecurityService,Multiple failed login attempts detected
+2026-02-11 10:31:00,INFO,BackupService,Daily backup completed successfully

@@ -1,0 +1,35 @@
+{
+  "name": "Apache Access Log",
+  "description": "Apache服务器访问日志格式",
+  "delimiter": " ",
+  "fields": [
+    {
+      "name": "ip",
+      "description": "客户端IP地址"
+    },
+    {
+      "name": "identity",
+      "description": "客户端身份标识"
+    },
+    {
+      "name": "user",
+      "description": "用户名"
+    },
+    {
+      "name": "timestamp",
+      "description": "访问时间戳"
+    },
+    {
+      "name": "request",
+      "description": "HTTP请求"
+    },
+    {
+      "name": "status",
+      "description": "HTTP响应状态码"
+    },
+    {
+      "name": "size",
+      "description": "响应大小（字节）"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+192.168.1.1 - admin [10/Jan/2026:10:30:15] GET /api/users 200 1024
+192.168.1.2 - guest [10/Jan/2026:10:30:20] POST /api/login 401 256
+192.168.1.3 - admin [10/Jan/2026:10:30:25] GET /dashboard 200 8192
+192.168.1.1 - admin [10/Jan/2026:10:30:30] DELETE /api/users/123 200 128
+192.168.1.4 - guest [10/Jan/2026:10:30:35] GET /index.html 404 512
+192.168.1.2 - user1 [10/Jan/2026:10:30:40] POST /api/data 201 2048
+192.168.1.5 - admin [10/Jan/2026:10:30:45] GET /api/logs 200 16384
+192.168.1.3 - user2 [10/Jan/2026:10:30:50] PUT /api/settings 200 1024
+192.168.1.1 - admin [10/Jan/2026:10:30:55] GET /api/stats 200 4096
+192.168.1.6 - guest [10/Jan/2026:10:31:00] GET /login.html 200 2048

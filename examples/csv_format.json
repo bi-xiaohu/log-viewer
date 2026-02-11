@@ -1,0 +1,23 @@
+{
+  "name": "CSV Log Format",
+  "description": "逗号分隔值日志格式",
+  "delimiter": ",",
+  "fields": [
+    {
+      "name": "timestamp",
+      "description": "时间戳"
+    },
+    {
+      "name": "level",
+      "description": "日志级别"
+    },
+    {
+      "name": "module",
+      "description": "模块名称"
+    },
+    {
+      "name": "message",
+      "description": "日志消息"
+    }
+  ]
+}
