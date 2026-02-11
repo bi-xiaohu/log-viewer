@@ -48,6 +48,10 @@ private:
     // 粘贴区
     char pasteBuffer_[4096] = "";  // 支持粘贴多条日志
     
+    // Format编辑器扩展
+    int fieldCountInput_ = 1;  // 字段数量输入
+    char formatPatternBuffer_[512] = "";  // 格式模式输入（如 %field1|%field2）
+    
     // 临时编辑状态
     LogFormat editingFormat_;
     bool isEditingFormat_ = false;
@@ -84,6 +88,7 @@ private:
     void importSingleLog();
     void applySearch();
     void clearSearch();
+    void copySelectedLogToClipboard();  // 新增：复制功能
     
     // 工具函数
     std::string openFileDialog(const char* filter, bool save = false);

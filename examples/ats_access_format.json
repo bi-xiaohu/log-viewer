@@ -1,0 +1,171 @@
+{
+  "name": "ATS Access Log",
+  "description": "ATS访问日志格式",
+  "delimiter": "|",
+  "fields": [
+    {
+      "name": "%<cquuc>",
+      "description": "客户端IP地址"
+    },
+    {
+      "name": "%<phn>",
+      "description": "主机名"
+    },
+    {
+      "name": "%<cqts>",
+      "description": "客户端请求的时间（整数表示）：1733130429"
+    },
+    {
+      "name": "%<cqtt>",
+      "description": "客户端请求时间（24小时制）：17:07:09"
+    },
+    {
+      "name": "%<ttms>",
+      "description": "ATS完整处理请求的时间（毫秒） "
+    },
+    {
+      "name": "%<pssc>",
+      "description": "ATS发给客户端的应答状态码"
+    },
+    {
+      "name": "%<sssc>",
+      "description": "源站发给ATS的应答状态码"
+    },
+    {
+      "name": "%<{X-Forwarded-For}cqh>",
+      "description": "客户端请求中的{X-Forwarded-For}"
+    },
+    {
+      "name": "%<cqhm>",
+      "description": "客户端请求方法"
+    },
+    {
+      "name": "%<cqhv>",
+      "description": "客户端请求的HTTP版本"
+    },
+    {
+      "name": "%<phi>",
+      "description": "代理服务器的IP"
+    },
+    {
+      "name": "%<shn>",
+      "description": "源站host"
+    },
+    {
+      "name": "%<pqsi>",
+      "description": "ATS发往上层或源站的IP"
+    },
+    {
+      "name": "%<crc>",
+      "description": "Cache查询状态码"
+    },
+    {
+      "name": "%<phr>",
+      "description": "ATS路由层级"
+    },
+    {
+      "name": "%<chm>",
+      "description": "Cache命中状态"
+    },
+    {
+      "name": "%<psql>",
+      "description": "ATS发给客户端的应答头加应答体的字节数"
+    },
+    {
+      "name": "%<php>",
+      "description": "ATS服务该请求的端口号"
+    },
+    {
+      "name": "%<{Content-Type}psh>",
+      "description": "ATS发给客户端应答头的{Content-Type}"
+    },
+    {
+      "name": "%<{Host}cqh>",
+      "description": "客户端请求中的{Host}"
+    },
+    {
+      "name": "%<cqu>",
+      "description": "客户端请求的URI（反向代理模式下记录map后的URL）"
+    },
+    {
+      "name": "%<{Referer}cqh>",
+      "description": "客户端请求中的{Referer}"
+    },
+    {
+      "name": "%<{User-Agent}cqh>",
+      "description": "客户端请求中的{User-Agent}"
+    },
+    {
+      "name": "%<{Host}pqh>",
+      "description": "ATS请求中的{host}"
+    },
+    {
+      "name": "%<psct>",
+      "description": "源站应答的文件类型"
+    },
+    {
+      "name": "%<pfsc>",
+      "description": "代理请求从ATS到源站的完成状态"
+    },
+    {
+      "name": "%<{Cache-Control}ssh>",
+      "description": "源站应答中的{Cache-Control}"
+    },
+    {
+      "name": "%<{Set-Cookie}ssh>",
+      "description": "源站应答中的{Set-Cookie}"
+    },
+    {
+      "name": "%<sscl>",
+      "description": "源站应答体的字节数"
+    },
+    {
+      "name": "%<pqsp>",
+      "description": "ATS向源站发出代理请求的端口号"
+    },
+    {
+      "name": "%<ssql>",
+      "description": "源站应答头加应答体的字节数"
+    },
+    {
+      "name": "%<{Date}pqh>",
+      "description": "ATS请求中的{Date}"
+    },
+    {
+      "name": "%<cqtt>",
+      "description": "客户端请求时间（24小时制）"
+    },
+    {
+      "name": "%<stms>",
+      "description": "ATS回源时间（连接建立到断开）"
+    },
+    {
+      "name": "%<{Range}pqh>",
+      "description": "ATS请求中的{Date}"
+    },
+    {
+      "name": "%<dtms>",
+      "description": "nothing(?): 0/0/0/-1/95/-1/-1/-1/-1/-1/-1/-1/96"
+    },
+    {
+      "name": "%<{Range}cqh>",
+      "description": "客户端请求中的{Range}"
+    },
+    {
+      "name": "%<{Content-Range}psh>",
+      "description": "ATS响应中的{Content-Range}"
+    },
+    {
+      "name": "%<{Hy-Request-ID}cqh>",
+      "description": "客户端请求中的{Hy-Request-ID}"
+    },
+    {
+      "name": "%<sli>",
+      "description": "-"
+    },
+    {
+      "name": "%<cqtq>",
+      "description": "-"
+    }
+  ]
+}

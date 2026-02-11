@@ -72,11 +72,17 @@ bool Application::initializeImGui() {
     ImGui_ImplGlfw_InitForOpenGL(window_, true);
     ImGui_ImplOpenGL3_Init("#version 330");
     
+    // 加载中文字体
+#ifdef _WIN32
+    // 使用系统微软雅黑字体
+    io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/msyh.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+#else
+    // Linux/macOS 可以尝试其他中文字体路径
+    // io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+#endif
+    
     // 设置默认主题（白天模式）
     applyLightTheme();
-    
-    // 加载中文字体（如果有）
-    // io.Fonts->AddFontFromFileTTF("assets/fonts/NotoSansSC-Regular.otf", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
     
     return true;
 }
@@ -261,13 +267,17 @@ void Application::renderLogTableView() {
     ImGui::SameLine();
     
     // 搜索框
-    ImGui::SetNextItemWidth(200);
+    ImGui::SetNextItemWidth(150);
     if (ImGui::InputText("##Search", searchBuffer_, sizeof(searchBuffer_))) {
         applySearch();
     }
     ImGui::SameLine();
     if (ImGui::Button("Clear")) {
         clearSearch();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Copy Selected") && selectedLogIndex_ >= 0) {
+        copySelectedLogToClipboard();
     }
     
     ImGui::Separator();
@@ -276,13 +286,14 @@ void Application::renderLogTableView() {
     const auto& displayLogs = filteredLogs_.empty() ? logs_ : filteredLogs_;
     
     if (currentFormat_ && ImGui::BeginTable("LogTable", currentFormat_->getFieldCount() + 1, 
-                                             ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY)) {
+                                             ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX)) {
         // 表头
         ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_WidthFixed, 50);
         const auto& fields = currentFormat_->getFields();
         for (const auto& field : fields) {
-            ImGui::TableSetupColumn(field.name.c_str());
+            ImGui::TableSetupColumn(field.name.c_str(), ImGuiTableColumnFlags_WidthFixed, 120);
         }
+        ImGui::TableSetupScrollFreeze(1, 1); // 冻结第一列和表头
         ImGui::TableHeadersRow();
         
         // 数据行
@@ -301,15 +312,30 @@ void Application::renderLogTableView() {
             for (const auto& field : fields) {
                 ImGui::TableSetColumnIndex(col++);
                 std::string fieldValue = entry.getField(field.name);
-                ImGui::Text("%s", fieldValue.c_str());
                 
-                // 鼠标悬停显示字段说明
-                if (ImGui::IsItemHovered() && !field.description.empty()) {
+                // 截断长文本显示（超过50个字符）
+                std::string displayValue = fieldValue;
+                bool isTruncated = false;
+                if (fieldValue.length() > 50) {
+                    displayValue = fieldValue.substr(0, 47) + "...";
+                    isTruncated = true;
+                }
+                
+                ImGui::TextUnformatted(displayValue.c_str());
+                
+                // 鼠标悬停显示完整信息
+                if (ImGui::IsItemHovered()) {
                     ImGui::BeginTooltip();
                     ImGui::TextColored(ImVec4(0.4f, 0.7f, 1.0f, 1.0f), "[%s]", field.name.c_str());
-                    ImGui::Text("%s", field.description.c_str());
-                    ImGui::Separator();
-                    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Value: %s", fieldValue.c_str());
+                    if (!field.description.empty()) {
+                        ImGui::Text("%s", field.description.c_str());
+                        ImGui::Separator();
+                    }
+                    if (isTruncated) {
+                        ImGui::TextWrapped("%s", fieldValue.c_str());
+                    } else {
+                        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Value: %s", fieldValue.c_str());
+                    }
                     ImGui::EndTooltip();
                 }
             }
@@ -376,7 +402,7 @@ void Application::renderPasteArea() {
 }
 
 void Application::renderFormatEditor() {
-    ImGui::SetNextWindowSize(ImVec2(600, 500), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(700, 700), ImGuiCond_FirstUseEver);
     ImGui::Begin("Format Editor", &showFormatEditor_);
     
     char nameBuffer[128];
@@ -396,9 +422,69 @@ void Application::renderFormatEditor() {
     editingFormat_.setDelimiter(delimBuffer);
     
     ImGui::Separator();
-    ImGui::Text("Fields:");
     
-    // 字段列表
+    // 快速生成字段区域
+    ImGui::Text("Quick Field Generation:");
+    ImGui::SetNextItemWidth(150);
+    ImGui::InputInt("Number of Fields", &fieldCountInput_, 1, 10);
+    ImGui::SameLine();
+    if (ImGui::Button("Generate Fields")) {
+        if (fieldCountInput_ > 0 && fieldCountInput_ <= 50) {
+            editingFormat_.clearFields();
+            for (int i = 0; i < fieldCountInput_; ++i) {
+                editingFormat_.addField({"field" + std::to_string(i + 1), ""});
+            }
+        }
+    }
+    
+    ImGui::Separator();
+    
+    // 格式模式解析区域
+    ImGui::Text("Parse Format Pattern (e.g., %%timestamp|%%level|%%message):");
+    ImGui::InputText("##FormatPattern", formatPatternBuffer_, sizeof(formatPatternBuffer_));
+    ImGui::SameLine();
+    if (ImGui::Button("Parse Pattern")) {
+        std::string pattern = formatPatternBuffer_;
+        if (!pattern.empty()) {
+            editingFormat_.clearFields();
+            std::string delimiter = editingFormat_.getDelimiter();
+            
+            // 按分隔符切割
+            size_t start = 0;
+            size_t end = pattern.find(delimiter);
+            
+            while (end != std::string::npos) {
+                std::string token = pattern.substr(start, end - start);
+                // 移除 % 前缀
+                if (!token.empty() && token[0] == '%') {
+                    token = token.substr(1);
+                }
+                if (!token.empty()) {
+                    editingFormat_.addField({token, ""});
+                }
+                start = end + delimiter.length();
+                end = pattern.find(delimiter, start);
+            }
+            
+            // 添加最后一个字段
+            std::string token = pattern.substr(start);
+            if (!token.empty() && token[0] == '%') {
+                token = token.substr(1);
+            }
+            if (!token.empty()) {
+                editingFormat_.addField({token, ""});
+            }
+            
+            formatPatternBuffer_[0] = '\0';
+        }
+    }
+    
+    ImGui::Separator();
+    ImGui::Text("Fields (scroll to view all):");
+    
+    // 字段列表 - 使用滚动区域
+    ImGui::BeginChild("FieldsList", ImVec2(0, 300), true);
+    
     auto fields = editingFormat_.getFields();
     for (size_t i = 0; i < fields.size(); ++i) {
         ImGui::PushID(static_cast<int>(i));
@@ -411,7 +497,7 @@ void Application::renderFormatEditor() {
         ImGui::SetNextItemWidth(150);
         ImGui::InputText("##Name", fieldName, sizeof(fieldName));
         ImGui::SameLine();
-        ImGui::SetNextItemWidth(250);
+        ImGui::SetNextItemWidth(300);
         ImGui::InputText("##Desc", fieldDesc, sizeof(fieldDesc));
         ImGui::SameLine();
         
@@ -426,18 +512,20 @@ void Application::renderFormatEditor() {
         ImGui::PopID();
     }
     
-    if (ImGui::Button("Add Field")) {
-        editingFormat_.addField({"Field" + std::to_string(fields.size() + 1), ""});
-    }
+    ImGui::EndChild();
     
+    // 底部按钮 - 固定位置
     ImGui::Separator();
-    
-    if (ImGui::Button("Save")) {
+    if (ImGui::Button("Add Field", ImVec2(120, 0))) {
+        editingFormat_.addField({"field" + std::to_string(fields.size() + 1), ""});
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Save", ImVec2(120, 0))) {
         saveCurrentFormat();
         showFormatEditor_ = false;
     }
     ImGui::SameLine();
-    if (ImGui::Button("Cancel")) {
+    if (ImGui::Button("Cancel", ImVec2(120, 0))) {
         showFormatEditor_ = false;
     }
     
@@ -587,6 +675,30 @@ void Application::applySearch() {
 void Application::clearSearch() {
     searchBuffer_[0] = '\0';
     filteredLogs_.clear();
+}
+
+void Application::copySelectedLogToClipboard() {
+    if (selectedLogIndex_ < 0 || selectedLogIndex_ >= static_cast<int>(logs_.size())) {
+        return;
+    }
+    
+    const auto& entry = logs_[selectedLogIndex_];
+    const std::string& rawText = entry.getRawText();
+    
+#ifdef _WIN32
+    if (OpenClipboard(nullptr)) {
+        EmptyClipboard();
+        HGLOBAL hGlob = GlobalAlloc(GMEM_FIXED, rawText.size() + 1);
+        if (hGlob) {
+            memcpy(hGlob, rawText.c_str(), rawText.size() + 1);
+            SetClipboardData(CF_TEXT, hGlob);
+        }
+        CloseClipboard();
+    }
+#else
+    // Linux/macOS 可以使用 ImGui 的剪贴板API
+    ImGui::SetClipboardText(rawText.c_str());
+#endif
 }
 
 std::string Application::openFileDialog(const char* filter, bool save) {
